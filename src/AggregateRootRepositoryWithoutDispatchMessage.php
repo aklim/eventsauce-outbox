@@ -27,7 +27,7 @@ use function count;
 final class AggregateRootRepositoryWithoutDispatchMessage implements AggregateRootRepository
 {
     /**
-     * @param class-string<AggregateRoot> $aggregateRootClassName
+     * @param class-string<T> $aggregateRootClassName
      */
     public function __construct(
         private string $aggregateRootClassName,
