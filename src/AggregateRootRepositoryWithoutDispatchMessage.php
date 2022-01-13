@@ -68,6 +68,9 @@ final class AggregateRootRepositoryWithoutDispatchMessage implements AggregateRo
         return $messages->getReturn();
     }
 
+    /**
+     * @param T $aggregateRoot
+     */
     public function persist(object $aggregateRoot): void
     {
         assert($aggregateRoot instanceof AggregateRoot, 'Expected $aggregateRoot to be an instance of ' . AggregateRoot::class);
