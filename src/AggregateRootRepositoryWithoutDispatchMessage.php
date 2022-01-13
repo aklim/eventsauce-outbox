@@ -34,7 +34,8 @@ final class AggregateRootRepositoryWithoutDispatchMessage implements AggregateRo
         private MessageRepository $messageRepository,
         private MessageDecorator $decorator = new DefaultHeadersDecorator(),
         private ClassNameInflector $classNameInflector = new DotSeparatedSnakeCaseInflector()
-    ) {}
+    ) {
+    }
 
     /**
      * @return T

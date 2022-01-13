@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-
 namespace Andreo\EventSauce\Outbox;
 
 use EventSauce\MessageOutbox\OutboxRelay;
@@ -18,7 +17,7 @@ final class RelayOutboxMessagesCommand extends Command
         private bool $shouldRun = true,
         private int $batchSize = 100,
         private int $commitSize = 1
-    ){
+    ) {
         parent::__construct();
     }
 
@@ -39,10 +38,11 @@ final class RelayOutboxMessagesCommand extends Command
         $once = $input->getOption('once');
         if ($once) {
             $this->publishBatch();
+
             return 0;
         }
 
-        while($this->shouldRun) {
+        while ($this->shouldRun) {
             $numberOfMessagesDispatched = $this->publishBatch();
 
             if (0 === $numberOfMessagesDispatched) {

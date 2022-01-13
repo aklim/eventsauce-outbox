@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-
 namespace Andreo\EventSauce\Outbox;
 
 use EventSauce\EventSourcing\Message;

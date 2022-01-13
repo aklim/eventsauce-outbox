@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Tests\Consumer;
 
-
 use Andreo\EventSauce\Outbox\ForwardingMessageConsumer;
 use EventSauce\EventSourcing\Message;
 use EventSauce\EventSourcing\MessageDispatcher;

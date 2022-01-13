@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-
 namespace Tests\RepositoryWithoutDispatchMessage;
 
 use EventSauce\EventSourcing\Serialization\SerializablePayload;
