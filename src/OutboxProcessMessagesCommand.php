@@ -7,13 +7,18 @@ namespace Andreo\EventSauce\Outbox;
 use EventSauce\MessageOutbox\OutboxRelay;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Throwable;
 
-final class ProcessOutboxMessagesCommand extends Command
+#[AsCommand(
+    name: 'andreo:event-sauce:outbox-process-messages',
+    description: 'Outbox messages dispatching'
+)]
+final class OutboxProcessMessagesCommand extends Command
 {
     /**
      * @param iterable<string, OutboxRelay> $relays

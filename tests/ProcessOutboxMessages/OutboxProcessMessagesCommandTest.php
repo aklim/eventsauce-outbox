@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\ProcessOutboxMessages;
 
-use Andreo\EventSauce\Outbox\ProcessOutboxMessagesCommand;
+use Andreo\EventSauce\Outbox\OutboxProcessMessagesCommand;
 use EventSauce\BackOff\ImmediatelyFailingBackOffStrategy;
 use EventSauce\EventSourcing\Message;
 use EventSauce\EventSourcing\MessageConsumer;
@@ -15,7 +15,7 @@ use PHPUnit\Framework\TestCase;
 use stdClass;
 use Symfony\Component\Console\Tester\CommandTester;
 
-final class ProcessOutboxMessagesCommandTest extends TestCase
+final class OutboxProcessMessagesCommandTest extends TestCase
 {
     /**
      * @test
@@ -63,7 +63,7 @@ final class ProcessOutboxMessagesCommandTest extends TestCase
             new DeleteMessageOnCommit()
         );
 
-        $command = new ProcessOutboxMessagesCommand([$fooOutboxRelay, $barOutboxRelay]);
+        $command = new OutboxProcessMessagesCommand([$fooOutboxRelay, $barOutboxRelay]);
         $tester = new CommandTester($command);
 
         $tester->execute(['--limit' => 2]);
@@ -101,7 +101,7 @@ final class ProcessOutboxMessagesCommandTest extends TestCase
             new DeleteMessageOnCommit()
         );
 
-        $command = new ProcessOutboxMessagesCommand([$fooOutboxRelay]);
+        $command = new OutboxProcessMessagesCommand([$fooOutboxRelay]);
         $tester = new CommandTester($command);
 
         $tester->execute(['--limit' => 1, '--batch-size' => 5]);
@@ -131,7 +131,7 @@ final class ProcessOutboxMessagesCommandTest extends TestCase
             new DeleteMessageOnCommit()
         );
 
-        $command = new ProcessOutboxMessagesCommand([$fooOutboxRelay]);
+        $command = new OutboxProcessMessagesCommand([$fooOutboxRelay]);
         $tester = new CommandTester($command);
 
         $tester->execute(['--run' => '0', '--limit' => 1]);
