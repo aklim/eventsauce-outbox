@@ -51,11 +51,15 @@ final class ProcessOutboxMessagesCommand extends Command
             $numberOfMessagesDispatched = 0;
             try {
                 foreach ($this->relays as $name => $relay) {
-                    $numberOfMessagesDispatched += $relay->publishBatch($this->batchSize, $this->commitSize, );
+                    $number = $relay->publishBatch($this->batchSize, $this->commitSize);
+                    if ($number > 0) {
+                        $this->logger->debug('Relay {relay} dispatched {number} messages.', ['relay' => $name]);
+                    }
+                    $numberOfMessagesDispatched += $number;
                 }
             } catch (Throwable $throwable) {
                 $this->logger->critical(
-                    'Process outbox messages failed. Error: {error}, Relay {relay}',
+                    'Process outbox messages failed. Error: {error}, Relay {relay}.',
                     [
                         'error' => $throwable->getMessage(),
                         'relay' => $name,
