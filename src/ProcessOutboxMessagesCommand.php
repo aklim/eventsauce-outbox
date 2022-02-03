@@ -62,6 +62,7 @@ final class ProcessOutboxMessagesCommand extends Command
                         'exception' => $throwable,
                     ]
                 );
+                $output->writeln('Closed.');
 
                 return 1;
             }
@@ -73,7 +74,7 @@ final class ProcessOutboxMessagesCommand extends Command
             ++$processCounter;
         }
 
-        $output->writeln('Closed.');
+        $output->writeln('Done.');
 
         return 0;
     }
