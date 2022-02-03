@@ -20,7 +20,7 @@ final class ProcessOutboxMessagesCommandTest extends TestCase
     /**
      * @test
      */
-    public function messages_publishing(): void
+    public function should_messages_published(): void
     {
         $fooOutboxRepository = new InMemoryOutboxRepository();
         $fooOutboxRepository->persist(
@@ -67,5 +67,73 @@ final class ProcessOutboxMessagesCommandTest extends TestCase
         $tester = new CommandTester($command);
 
         $tester->execute(['--limit' => 2]);
+    }
+
+    /**
+     * @test
+     */
+    public function should_messages_published_based_on_batch_size(): void
+    {
+        $fooOutboxRepository = new InMemoryOutboxRepository();
+        $fooOutboxRepository->persist(
+            new Message(new stdClass()),
+            new Message(new stdClass()),
+            new Message(new stdClass()),
+            new Message(new stdClass()),
+            new Message(new stdClass()),
+            new Message(new stdClass()),
+            new Message(new stdClass()),
+            new Message(new stdClass()),
+            new Message(new stdClass()),
+            new Message(new stdClass()),
+        );
+
+        $fooMessageConsumerMock = $this->createMock(MessageConsumer::class);
+        $fooMessageConsumerMock
+            ->expects($this->exactly(5))
+            ->method('handle')
+        ;
+
+        $fooOutboxRelay = new OutboxRelay(
+            $fooOutboxRepository,
+            $fooMessageConsumerMock,
+            new ImmediatelyFailingBackOffStrategy(),
+            new DeleteMessageOnCommit()
+        );
+
+        $command = new ProcessOutboxMessagesCommand([$fooOutboxRelay]);
+        $tester = new CommandTester($command);
+
+        $tester->execute(['--limit' => 1, '--batch-size' => 5]);
+    }
+
+    /**
+     * @test
+     */
+    public function should_messages_not_published__if_watching_is_disabled(): void
+    {
+        $fooOutboxRepository = new InMemoryOutboxRepository();
+        $fooOutboxRepository->persist(
+            new Message(new stdClass()),
+            new Message(new stdClass()),
+        );
+
+        $fooMessageConsumerMock = $this->createMock(MessageConsumer::class);
+        $fooMessageConsumerMock
+            ->expects($this->exactly(0))
+            ->method('handle')
+        ;
+
+        $fooOutboxRelay = new OutboxRelay(
+            $fooOutboxRepository,
+            $fooMessageConsumerMock,
+            new ImmediatelyFailingBackOffStrategy(),
+            new DeleteMessageOnCommit()
+        );
+
+        $command = new ProcessOutboxMessagesCommand([$fooOutboxRelay]);
+        $tester = new CommandTester($command);
+
+        $tester->execute(['--run' => '0', '--limit' => 1]);
     }
 }

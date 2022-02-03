@@ -20,38 +20,74 @@ final class ProcessOutboxMessagesCommand extends Command
      */
     public function __construct(
         private iterable $relays,
-        private LoggerInterface $logger = new NullLogger(),
-        private bool $shouldRun = true,
-        private int $batchSize = 100,
-        private int $commitSize = 1,
-        private int $rest = 1,
+        private LoggerInterface $logger = new NullLogger()
     ) {
         parent::__construct();
     }
 
     protected function configure(): void
     {
-        $this->addOption(
-            name: 'limit',
-            mode: InputOption::VALUE_OPTIONAL,
-            description: 'How many times are messages to be processed',
-            default: -1
-        );
+        $this
+            ->addOption(
+                name: 'run',
+                mode: InputOption::VALUE_OPTIONAL | InputOption::VALUE_REQUIRED,
+                description: 'Processing messages run',
+                default: true
+            )
+            ->addOption(
+                name: 'batch-size',
+                mode: InputOption::VALUE_OPTIONAL | InputOption::VALUE_REQUIRED,
+                description: 'How many messages are to be processed at once',
+                default: 100
+            )
+            ->addOption(
+                name: 'commit-size',
+                mode: InputOption::VALUE_OPTIONAL | InputOption::VALUE_REQUIRED,
+                description: 'How many messages are to be committed at once',
+                default: 1
+            )
+            ->addOption(
+                name: 'rest',
+                mode: InputOption::VALUE_OPTIONAL | InputOption::VALUE_REQUIRED,
+                description: 'Number of seconds to rest if the repository is empty.',
+                default: 1
+            )
+            ->addOption(
+                name: 'limit',
+                mode: InputOption::VALUE_OPTIONAL | InputOption::VALUE_REQUIRED,
+                description: 'How many times are messages to be processed',
+                default: -1
+            )
+        ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $output->writeln('Running...');
 
-        /** @var int $limit */
+        $run = filter_var($input->getOption('run'), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+        $batchSize = $input->getOption('batch-size');
+        $commitSize = $input->getOption('commit-size');
+        $rest = $input->getOption('rest');
         $limit = $input->getOption('limit');
 
+        if (!is_bool($run) || !is_numeric($batchSize) || !is_numeric($commitSize) || !is_numeric($rest) || !is_numeric($limit)) {
+            $output->writeln('Invalid input. Check your parameters.');
+
+            return self::INVALID;
+        }
+
+        $batchSize = (int) $batchSize;
+        $commitSize = (int) $commitSize;
+        $rest = (int) $rest;
+        $limit = (int) $limit;
+
         $processCounter = 0;
-        while ($this->shouldRun && (-1 === $limit || $processCounter < $limit)) {
+        while ($run && (-1 === $limit || $processCounter < $limit)) {
             $numberOfMessagesDispatched = 0;
             try {
                 foreach ($this->relays as $name => $relay) {
-                    if (0 < $number = $relay->publishBatch($this->batchSize, $this->commitSize)) {
+                    if (0 < $number = $relay->publishBatch($batchSize, $commitSize)) {
                         $this->logger->debug('Relay {relay} dispatched {number} messages.', ['relay' => $name]);
                     }
                     $numberOfMessagesDispatched += $number;
@@ -67,11 +103,11 @@ final class ProcessOutboxMessagesCommand extends Command
                 );
                 $output->writeln('Closed.');
 
-                return 1;
+                return self::FAILURE;
             }
 
             if (0 === $numberOfMessagesDispatched) {
-                sleep($this->rest);
+                sleep($rest);
             }
 
             ++$processCounter;
@@ -79,6 +115,6 @@ final class ProcessOutboxMessagesCommand extends Command
 
         $output->writeln('Done.');
 
-        return 0;
+        return self::SUCCESS;
     }
 }
