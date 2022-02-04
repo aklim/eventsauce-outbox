@@ -6,7 +6,7 @@ namespace Tests\RepositoryWithoutDispatchMessage;
 
 use EventSauce\EventSourcing\Serialization\SerializablePayload;
 
-final class AggregateNumberIncremented implements SerializablePayload
+final class DummyNumberIncremented implements SerializablePayload
 {
     private int $number;
 

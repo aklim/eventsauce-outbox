@@ -19,13 +19,13 @@ class AggregateFake implements AggregateRootWithSnapshotting
     public function increment(): void
     {
         $this->recordThat(
-            new AggregateNumberIncremented(
+            new DummyNumberIncremented(
                 $this->incrementedNumber + 1
             )
         );
     }
 
-    protected function applyAggregateNumberIncremented(AggregateNumberIncremented $event): void
+    protected function applyDummyNumberIncremented(DummyNumberIncremented $event): void
     {
         $this->incrementedNumber = $event->getNumber();
     }

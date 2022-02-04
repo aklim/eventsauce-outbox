@@ -15,7 +15,7 @@ class ForwardingMessageConsumerTest extends TestCase
     /**
      * @test
      */
-    public function message_handled(): void
+    public function should_forward_message_by_dispatcher(): void
     {
         $dispatcherMock = $this->createMock(MessageDispatcher::class);
         $message = new Message(new stdClass());

@@ -14,7 +14,7 @@ final class AggregateRootRepositoryWithoutDispatchMessageTest extends TestCase
     /**
      * @test
      */
-    public function aggregate_versions_are_incremented_per_event(): void
+    public function should_repository_behaviour_is_valid(): void
     {
         $messageRepository = new InMemoryMessageRepository();
         $repository = new AggregateRootRepositoryWithoutDispatchMessage(AggregateFake::class, $messageRepository);
