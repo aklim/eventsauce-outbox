@@ -36,11 +36,17 @@ final class EventSourcedAggregateRootRepositoryForOutbox implements AggregateRoo
     ) {
     }
 
+    /**
+     * @return T
+     */
     public function retrieve(AggregateRootId $aggregateRootId): object
     {
         return $this->regularRepository->retrieve($aggregateRootId);
     }
 
+    /**
+     * @param T $aggregateRoot
+     */
     public function persist(object $aggregateRoot): void
     {
         $this->regularRepository->persist($aggregateRoot);
