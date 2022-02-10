@@ -2,14 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Tests\RepositoryWithoutDispatchMessage;
+namespace Tests\OutboxRepository;
 
-use Andreo\EventSauce\Outbox\AggregateRootRepositoryWithoutDispatchMessage;
+use Andreo\EventSauce\Outbox\EventSourcedAggregateRootRepositoryForOutbox;
+use EventSauce\EventSourcing\EventSourcedAggregateRootRepository;
 use EventSauce\EventSourcing\InMemoryMessageRepository;
 use EventSauce\EventSourcing\Message;
 use PHPUnit\Framework\TestCase;
 
-final class AggregateRootRepositoryWithoutDispatchMessageTest extends TestCase
+final class EventSourcedAggregateRootRepositoryForOutboxTest extends TestCase
 {
     /**
      * @test
@@ -17,7 +18,14 @@ final class AggregateRootRepositoryWithoutDispatchMessageTest extends TestCase
     public function should_repository_behaviour_is_valid(): void
     {
         $messageRepository = new InMemoryMessageRepository();
-        $repository = new AggregateRootRepositoryWithoutDispatchMessage(AggregateFake::class, $messageRepository);
+        $repository = new EventSourcedAggregateRootRepositoryForOutbox(
+            AggregateFake::class,
+            $messageRepository,
+            new EventSourcedAggregateRootRepository(
+                AggregateFake::class,
+                $messageRepository
+            ),
+        );
         $aggregateRootId = DummyAggregateId::create();
         $aggregate = $repository->retrieve($aggregateRootId);
         $this->assertInstanceOf(AggregateFake::class, $aggregate);

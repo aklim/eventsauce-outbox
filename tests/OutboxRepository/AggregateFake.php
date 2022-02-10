@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\RepositoryWithoutDispatchMessage;
+namespace Tests\OutboxRepository;
 
 use EventSauce\EventSourcing\AggregateRootBehaviour;
 use EventSauce\EventSourcing\AggregateRootId;
