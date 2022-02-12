@@ -1,6 +1,6 @@
 {
     "name": "andreo/eventsauce-outbox",
-    "description": "Extended message outbox components of the EventSauce.",
+    "description": "Extended message outbox components for EventSauce.",
     "keywords": [
         "eventsauce",
         "components",

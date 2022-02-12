@@ -1,6 +1,6 @@
 ## eventsauce-outbox
 
-Extended message outbox components of the EventSauce
+Extended message outbox components for EventSauce
 
 ```bash
 composer require andreo/eventsauce-outbox
