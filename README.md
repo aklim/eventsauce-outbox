@@ -13,7 +13,7 @@ composer require andreo/eventsauce-outbox
 
 ### Repository
 
-By default, the event sauce uses [EventSourcedAggregateRootRepository](https://eventsauce.io/docs/event-sourcing/bootstrap/). 
+By default, the EventSauce uses [EventSourcedAggregateRootRepository](https://eventsauce.io/docs/event-sourcing/bootstrap/). 
 However, when using the outbox pattern, we do not need to dispatch a message. 
 This repository decorates the original repository and ignores dispatch a message
 
@@ -23,14 +23,14 @@ use Andreo\EventSauce\Outbox\EventSourcedAggregateRootRepositoryForOutbox;
 
 new EventSourcedAggregateRootRepositoryForOutbox(
     aggregateRootClassName: $aggregateRootClassName,
-    messageRepository: $messageRepository,
-    regularRepository: $regularRepository
+    messageRepository: $messageRepository, // EventSauce\EventSourcing\MessageRepository
+    regularRepository: $regularRepository // EventSauce\EventSourcing\AggregateRootRepository
 )
 ```
 
 ### Forwarding message consumer
 
-This consumer dispatch messages through the mesage dispatcher 
+This consumer dispatch messages through the message dispatcher 
 to the queuing system
 
 ```php
