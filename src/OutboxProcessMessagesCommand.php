@@ -52,9 +52,9 @@ final class OutboxProcessMessagesCommand extends Command
                 default: 1
             )
             ->addOption(
-                name: 'rest',
+                name: 'sleep',
                 mode: InputOption::VALUE_OPTIONAL | InputOption::VALUE_REQUIRED,
-                description: 'Number of seconds to rest if the repository is empty.',
+                description: 'Number of seconds to sleep if the repository is empty.',
                 default: 1
             )
             ->addOption(
@@ -73,10 +73,10 @@ final class OutboxProcessMessagesCommand extends Command
         $run = filter_var($input->getOption('run'), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
         $batchSize = $input->getOption('batch-size');
         $commitSize = $input->getOption('commit-size');
-        $rest = $input->getOption('rest');
+        $sleep = $input->getOption('sleep');
         $limit = $input->getOption('limit');
 
-        if (!is_bool($run) || !is_numeric($batchSize) || !is_numeric($commitSize) || !is_numeric($rest) || !is_numeric($limit)) {
+        if (!is_bool($run) || !is_numeric($batchSize) || !is_numeric($commitSize) || !is_numeric($sleep) || !is_numeric($limit)) {
             $output->writeln('Invalid input. Check your parameters.');
 
             return self::INVALID;
@@ -84,7 +84,7 @@ final class OutboxProcessMessagesCommand extends Command
 
         $batchSize = (int) $batchSize;
         $commitSize = (int) $commitSize;
-        $rest = (int) $rest;
+        $sleep = (int) $sleep;
         $limit = (int) $limit;
 
         $processCounter = 0;
@@ -112,7 +112,7 @@ final class OutboxProcessMessagesCommand extends Command
             }
 
             if (0 === $numberOfMessagesDispatched) {
-                sleep($rest);
+                sleep($sleep);
             }
 
             ++$processCounter;

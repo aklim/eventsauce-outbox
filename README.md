@@ -83,9 +83,9 @@ How many messages are to be committed at once
 - optional
 - default: 1
 
-#### --rest option
+#### --sleep option
 
-Number of seconds to rest if the repository is empty
+Number of seconds to sleep if the repository is empty
 
 - optional
 - default: 1
