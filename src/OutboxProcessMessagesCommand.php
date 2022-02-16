@@ -68,7 +68,7 @@ final class OutboxProcessMessagesCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $output->writeln('Running...');
+        $output->writeln('Dispatching messages of outbox is running...');
 
         $run = filter_var($input->getOption('run'), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
         $batchSize = $input->getOption('batch-size');
@@ -106,7 +106,7 @@ final class OutboxProcessMessagesCommand extends Command
                         'exception' => $throwable,
                     ]
                 );
-                $output->writeln('Closed.');
+                $output->writeln('Dispatching messages of outbox failed.');
 
                 return self::FAILURE;
             }
@@ -118,7 +118,7 @@ final class OutboxProcessMessagesCommand extends Command
             ++$processCounter;
         }
 
-        $output->writeln('Done.');
+        $output->writeln('Dispatching complete.');
 
         return self::SUCCESS;
     }
