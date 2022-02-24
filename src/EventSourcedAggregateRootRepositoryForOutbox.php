@@ -44,12 +44,15 @@ final class EventSourcedAggregateRootRepositoryForOutbox implements AggregateRoo
         return $this->regularRepository->retrieve($aggregateRootId);
     }
 
-    /**
-     * @param T $aggregateRoot
-     */
     public function persist(object $aggregateRoot): void
     {
-        $this->regularRepository->persist($aggregateRoot);
+        assert($aggregateRoot instanceof AggregateRoot, 'Expected $aggregateRoot to be an instance of ' . AggregateRoot::class);
+
+        $this->persistEvents(
+            $aggregateRoot->aggregateRootId(),
+            $aggregateRoot->aggregateRootVersion(),
+            ...$aggregateRoot->releaseEvents()
+        );
     }
 
     public function persistEvents(AggregateRootId $aggregateRootId, int $aggregateRootVersion, object ...$events): void
