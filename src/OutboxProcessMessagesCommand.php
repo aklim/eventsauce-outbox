@@ -94,7 +94,7 @@ final class OutboxProcessMessagesCommand extends Command
             foreach ($this->relays as $name => $relay) {
                 try {
                     if (0 < $number = $relay->publishBatch($batchSize, $commitSize)) {
-                        $this->logger->info('Relay {relay} dispatched {number} messages.', ['relay' => $name, 'number', $number]);
+                        $this->logger->info('Relay {relay} dispatched {number} messages.', ['relay' => $name, 'number' => $number]);
                     }
                     $numberOfMessagesDispatched += $number;
                 } catch (Throwable $throwable) {
