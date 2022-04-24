@@ -16,7 +16,6 @@ use Throwable;
 
 #[AsCommand(
     name: 'andreo:event-sauce:outbox-process-messages',
-    description: 'Outbox messages dispatching'
 )]
 final class OutboxProcessMessagesCommand extends Command
 {

@@ -7,7 +7,3 @@ services:
         container_name: eventsauce_outbox_php
         volumes:
             - ../../:/var/library:rw
-        networks:
-            - default
-networks:
-    default:
