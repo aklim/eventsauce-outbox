@@ -38,13 +38,11 @@ to the queuing system
 use Andreo\EventSauce\Outbox\ForwardingMessageConsumer;
 
 new ForwardingMessageConsumer(
-    messageDispatcher: $messageDispatcher
+    messageDispatcher: $messageDispatcher // EventSauce\EventSourcing\MessageDispatcher
 )
 ```
 
-### Outbox messages dispatching
-
-This bundle supplies a command that sends messages from all relays
+### Dispatch outbox messages
 
 ```php
 
@@ -52,47 +50,47 @@ use Andreo\EventSauce\Outbox\OutboxProcessMessagesCommand;
 
 new OutboxProcessMessagesCommand(
     relays: $relays, // iterable<EventSauce\MessageOutbox\OutboxRelay>
-    logger: $logger, // optional
+    logger: $logger, // Psr\Log\LoggerInterface | null
 )
 ```
 
-#### Usage command
+#### Run dispatching
 
 ```bash
 php bin/console andreo:event-sauce:outbox-process-messages
 ```
 
-#### --run option
+#### Command options
 
-Processing messages run
+**--run=true**
 
 - optional
 - default: true
 
-#### --batch-size option
+**--batch-size=100**
 
 How many messages are to be processed at once
 
 - optional
 - default: 100
 
-#### --commit-size option
+**--commit-size=1**
 
 How many messages are to be committed at once
 
 - optional
 - default: 1
 
-#### --sleep option
+**--sleep=1**
 
 Number of seconds to sleep if the repository is empty
 
 - optional
 - default: 1
 
-#### --limit option
+**--limit=-1**
 
-How many times are messages to be processed
+How many times messages are  to be processed
 
 - optional
-- default: -1 (unlimited)
+- default: -1 (infinity)

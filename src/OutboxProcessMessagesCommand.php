@@ -59,7 +59,7 @@ final class OutboxProcessMessagesCommand extends Command
             ->addOption(
                 name: 'limit',
                 mode: InputOption::VALUE_OPTIONAL | InputOption::VALUE_REQUIRED,
-                description: 'How many times are messages to be processed',
+                description: 'How many times messages are to be processed',
                 default: -1
             )
         ;
