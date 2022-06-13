@@ -15,7 +15,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Throwable;
 
 #[AsCommand(
-    name: 'andreo:event-sauce:outbox-process-messages',
+    name: 'andreo:eventsauce:message-outbox:consume',
 )]
 final class OutboxProcessMessagesCommand extends Command
 {

@@ -54,13 +54,13 @@ new OutboxProcessMessagesCommand(
 )
 ```
 
-#### Run dispatching
+#### Consume messages command
 
 ```bash
-php bin/console andreo:event-sauce:outbox-process-messages
+php bin/console andreo:eventsauce:message-outbox:consume
 ```
 
-#### Command options
+**Options**
 
 **--run=true**
 
