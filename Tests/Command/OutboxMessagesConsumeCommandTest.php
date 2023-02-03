@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Tests\ProcessOutboxMessages;
+namespace Andreo\EventSauce\Outbox\Tests\Command;
 
-use Andreo\EventSauce\Outbox\OutboxProcessMessagesCommand;
+use Andreo\EventSauce\Outbox\Command\OutboxMessagesConsumeCommand;
 use EventSauce\BackOff\ImmediatelyFailingBackOffStrategy;
 use EventSauce\EventSourcing\Message;
 use EventSauce\EventSourcing\MessageConsumer;
@@ -14,23 +14,19 @@ use EventSauce\MessageOutbox\OutboxRelay;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 use Symfony\Component\Console\Tester\CommandTester;
+use Symfony\Component\DependencyInjection\ServiceLocator;
 
-final class OutboxProcessMessagesCommandTest extends TestCase
+final class OutboxMessagesConsumeCommandTest extends TestCase
 {
     /**
      * @test
      */
-    public function should_messages_published(): void
+    public function should_outbox_messages_consume(): void
     {
         $fooOutboxRepository = new InMemoryOutboxRepository();
         $fooOutboxRepository->persist(
             new Message(new stdClass()),
             new Message(new stdClass()),
-            new Message(new stdClass()),
-        );
-
-        $barOutboxRepository = new InMemoryOutboxRepository();
-        $barOutboxRepository->persist(
             new Message(new stdClass()),
             new Message(new stdClass()),
             new Message(new stdClass()),
@@ -40,13 +36,7 @@ final class OutboxProcessMessagesCommandTest extends TestCase
 
         $fooMessageConsumerMock = $this->createMock(MessageConsumer::class);
         $fooMessageConsumerMock
-            ->expects($this->exactly(3))
-            ->method('handle')
-        ;
-
-        $barMessageConsumerMock = $this->createMock(MessageConsumer::class);
-        $barMessageConsumerMock
-            ->expects($this->exactly(5))
+            ->expects($this->exactly(7))
             ->method('handle')
         ;
 
@@ -56,23 +46,21 @@ final class OutboxProcessMessagesCommandTest extends TestCase
             new ImmediatelyFailingBackOffStrategy(),
             new DeleteMessageOnCommit()
         );
-        $barOutboxRelay = new OutboxRelay(
-            $barOutboxRepository,
-            $barMessageConsumerMock,
-            new ImmediatelyFailingBackOffStrategy(),
-            new DeleteMessageOnCommit()
-        );
 
-        $command = new OutboxProcessMessagesCommand([$fooOutboxRelay, $barOutboxRelay]);
+        $relays = new ServiceLocator([
+            'foo' => fn () => $fooOutboxRelay,
+        ]);
+
+        $command = new OutboxMessagesConsumeCommand($relays);
         $tester = new CommandTester($command);
 
-        $tester->execute(['--limit' => 2]);
+        $tester->execute(['relay-id' => 'foo', '--limit' => 2]);
     }
 
     /**
      * @test
      */
-    public function should_messages_published_based_on_batch_size(): void
+    public function should_outbox_messages_consume_based_on_batch_size(): void
     {
         $fooOutboxRepository = new InMemoryOutboxRepository();
         $fooOutboxRepository->persist(
@@ -101,16 +89,20 @@ final class OutboxProcessMessagesCommandTest extends TestCase
             new DeleteMessageOnCommit()
         );
 
-        $command = new OutboxProcessMessagesCommand([$fooOutboxRelay]);
+        $relays = new ServiceLocator([
+            'foo' => fn () => $fooOutboxRelay,
+        ]);
+
+        $command = new OutboxMessagesConsumeCommand($relays);
         $tester = new CommandTester($command);
 
-        $tester->execute(['--limit' => 1, '--batch-size' => 5]);
+        $tester->execute(['relay-id' => 'foo', '--limit' => 1, '--batch-size' => 5]);
     }
 
     /**
      * @test
      */
-    public function should_messages_not_published__if_watching_is_disabled(): void
+    public function should_outbox_messages_not_consume(): void
     {
         $fooOutboxRepository = new InMemoryOutboxRepository();
         $fooOutboxRepository->persist(
@@ -131,9 +123,13 @@ final class OutboxProcessMessagesCommandTest extends TestCase
             new DeleteMessageOnCommit()
         );
 
-        $command = new OutboxProcessMessagesCommand([$fooOutboxRelay]);
+        $relays = new ServiceLocator([
+            'foo' => fn () => $fooOutboxRelay,
+        ]);
+
+        $command = new OutboxMessagesConsumeCommand($relays);
         $tester = new CommandTester($command);
 
-        $tester->execute(['--run' => '0', '--limit' => 1]);
+        $tester->execute(['relay-id' => 'foo', '--run' => 'false', '--limit' => 1]);
     }
 }

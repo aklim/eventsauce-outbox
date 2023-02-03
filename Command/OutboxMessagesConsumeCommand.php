@@ -2,29 +2,32 @@
 
 declare(strict_types=1);
 
-namespace Andreo\EventSauce\Outbox;
+namespace Andreo\EventSauce\Outbox\Command;
 
 use EventSauce\MessageOutbox\OutboxRelay;
+use Psr\Container\ContainerExceptionInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\DependencyInjection\ServiceLocator;
 use Throwable;
 
 #[AsCommand(
     name: 'andreo:eventsauce:message-outbox:consume',
 )]
-final class OutboxProcessMessagesCommand extends Command
+final class OutboxMessagesConsumeCommand extends Command
 {
     /**
-     * @param iterable<string, OutboxRelay> $relays
+     * @param ServiceLocator<OutboxRelay> $relays
      */
     public function __construct(
-        private iterable $relays,
-        private LoggerInterface $logger = new NullLogger()
+        private readonly ServiceLocator $relays,
+        private readonly LoggerInterface $logger = new NullLogger()
     ) {
         parent::__construct();
     }
@@ -32,6 +35,11 @@ final class OutboxProcessMessagesCommand extends Command
     protected function configure(): void
     {
         $this
+            ->addArgument(
+                name: 'relay-id',
+                mode: InputArgument::REQUIRED,
+                description: 'Relay id to be run',
+            )
             ->addOption(
                 name: 'run',
                 mode: InputOption::VALUE_OPTIONAL | InputOption::VALUE_REQUIRED,
@@ -41,7 +49,7 @@ final class OutboxProcessMessagesCommand extends Command
             ->addOption(
                 name: 'batch-size',
                 mode: InputOption::VALUE_OPTIONAL | InputOption::VALUE_REQUIRED,
-                description: 'How many messages are to be processed at once',
+                description: 'How many messages are to be retrieve batch',
                 default: 100
             )
             ->addOption(
@@ -67,16 +75,22 @@ final class OutboxProcessMessagesCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $output->writeln('Dispatching messages of outbox is running...');
+        $output->writeln('Dispatching messages from the outbox has been run...');
 
         $run = filter_var($input->getOption('run'), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+        $relayId = $input->getArgument('relay-id');
         $batchSize = $input->getOption('batch-size');
         $commitSize = $input->getOption('commit-size');
         $sleep = $input->getOption('sleep');
         $limit = $input->getOption('limit');
 
-        if (!is_bool($run) || !is_numeric($batchSize) || !is_numeric($commitSize) || !is_numeric($sleep) || !is_numeric($limit)) {
-            $output->writeln('Invalid input. Check your parameters.');
+        if (!is_bool($run) ||
+            !is_numeric($batchSize) ||
+            !is_numeric($commitSize) ||
+            !is_numeric($sleep) ||
+            !is_numeric($limit)
+        ) {
+            $output->writeln('Invalid arguments.');
 
             return self::INVALID;
         }
@@ -88,37 +102,48 @@ final class OutboxProcessMessagesCommand extends Command
 
         $processCounter = 0;
         while ($run && (-1 === $limit || $processCounter < $limit)) {
-            $numberOfMessagesDispatched = 0;
+            try {
+                $relay = $this->relays->get($relayId);
+                assert($relay instanceof OutboxRelay);
+            } catch (ContainerExceptionInterface $e) {
+                $output->writeln(sprintf('Relay %s not found', $relayId));
 
-            foreach ($this->relays as $name => $relay) {
-                try {
-                    if (0 < $number = $relay->publishBatch($batchSize, $commitSize)) {
-                        $this->logger->info('Relay {relay} dispatched {number} messages.', ['relay' => $name, 'number' => $number]);
-                    }
-                    $numberOfMessagesDispatched += $number;
-                } catch (Throwable $throwable) {
-                    $this->logger->critical(
-                        'Process outbox messages failed. Error: {error}, Relay {relay}.',
-                        [
-                            'error' => $throwable->getMessage(),
-                            'relay' => $name,
-                            'exception' => $throwable,
-                        ]
-                    );
-                    $output->writeln('Dispatching messages of outbox failed.');
-
-                    return self::FAILURE;
-                }
+                return self::INVALID;
             }
 
-            if (0 === $numberOfMessagesDispatched) {
+            try {
+                $numberOfDispatchedMessages = $relay->publishBatch($batchSize, $commitSize);
+                if ($numberOfDispatchedMessages > 0) {
+                    $this->logger->info(
+                        'Relay: {relay} has dispatched {number} messages.',
+                        [
+                            'relay' => $relayId,
+                            'number' => $numberOfDispatchedMessages,
+                        ]
+                    );
+                }
+            } catch (Throwable $throwable) {
+                $this->logger->critical(
+                    'Failed to dispatch messages from the outbox. Error: {error}, Relay: {relay}.',
+                    [
+                        'error' => $throwable->getMessage(),
+                        'relay' => $relayId,
+                        'exception' => $throwable,
+                    ]
+                );
+                $output->writeln('Failed to dispatch messages from the outbox.');
+
+                return self::FAILURE;
+            }
+
+            if (0 === $numberOfDispatchedMessages) {
                 sleep($sleep);
             }
 
             ++$processCounter;
         }
 
-        $output->writeln('Dispatching complete.');
+        $output->writeln('Dispatching a messages from the outbox was successful.');
 
         return self::SUCCESS;
     }

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Tests\OutboxRepository;
+namespace Andreo\EventSauce\Outbox\Tests\Repository;
 
-use Andreo\EventSauce\Outbox\EventSourcedAggregateRootRepositoryForOutbox;
+use Andreo\EventSauce\Outbox\Repository\EventSourcedAggregateRootRepositoryForOutbox;
 use EventSauce\EventSourcing\EventSourcedAggregateRootRepository;
 use EventSauce\EventSourcing\InMemoryMessageRepository;
 use EventSauce\EventSourcing\Message;

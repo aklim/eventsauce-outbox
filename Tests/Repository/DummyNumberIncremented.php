@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\OutboxRepository;
+namespace Andreo\EventSauce\Outbox\Tests\Repository;
 
 use EventSauce\EventSourcing\Serialization\SerializablePayload;
 

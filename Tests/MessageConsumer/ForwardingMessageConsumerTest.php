@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Tests\Consumer;
+namespace Andreo\EventSauce\Outbox\Tests\MessageConsumer;
 
-use Andreo\EventSauce\Outbox\ForwardingMessageConsumer;
+use Andreo\EventSauce\Outbox\MessageConsumer\ForwardingMessageConsumer;
 use EventSauce\EventSourcing\Message;
 use EventSauce\EventSourcing\MessageDispatcher;
 use PHPUnit\Framework\TestCase;

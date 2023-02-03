@@ -16,11 +16,12 @@
         }
     ],
     "require": {
-        "php": "^8.1",
-        "eventsauce/eventsauce": "^2.0",
+        "php": ">=8.2",
+        "eventsauce/eventsauce": "^3.0",
         "eventsauce/message-outbox-for-doctrine": "^0.3.0",
-        "eventsauce/test-utilities": "^2.0",
-        "symfony/console": "^6.0"
+        "eventsauce/test-utilities": "^3.0",
+        "symfony/console": "^6.2",
+        "symfony/dependency-injection": "6.3.x-dev"
     },
     "require-dev": {
         "eventsauce/uuid-encoding": "^0.3",
@@ -33,9 +34,11 @@
     },
     "autoload": {
         "psr-4": {
-            "Andreo\\EventSauce\\Outbox\\": "src/",
-            "Tests\\": "tests/"
-        }
+            "Andreo\\EventSauce\\Outbox\\": ""
+        },
+        "exclude-from-classmap": [
+            "/Tests/"
+        ]
     },
     "minimum-stability": "dev"
 }

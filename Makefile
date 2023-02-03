@@ -6,7 +6,7 @@ help:
 		}' $(MAKEFILE_LIST)
 
 fix-cs: ## Fix cs
-	tools/php-cs-fixer/vendor/bin/php-cs-fixer fix --allow-risky=yes
+	PHP_CS_FIXER_IGNORE_ENV=1 tools/php-cs-fixer/vendor/bin/php-cs-fixer fix --allow-risky=yes
 
 phpunit: ## Run phpunit tests
 	vendor/bin/phpunit --color
@@ -14,6 +14,9 @@ phpunit: ## Run phpunit tests
 phpstan: ## Run phpstan
 	vendor/bin/phpstan --memory-limit=1G
 
+update: ## Run composer update
+	@$(DOCKER_COMPOSE) composer update
+
 test: ## Run phpunit and phpstan
 	vendor/bin/phpunit --color
-	vendor/bin/phpstan --memory-limit=1G
+	vendor/bin/phpstan --memory-limit=1Gmit=1G

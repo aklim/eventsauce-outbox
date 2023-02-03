@@ -1,4 +1,4 @@
-## eventsauce-outbox
+## eventsauce-outbox 3.0
 
 Extended message outbox components for EventSauce
 
@@ -8,18 +8,18 @@ composer require andreo/eventsauce-outbox
 
 ### Requirements
 
-- PHP ^8.1
-- Symfony console ^6.0
+- PHP >=8.2
+- Symfony console ^6.2
 
-### Repository
+#### Previous version docs
 
-By default, the EventSauce uses [EventSourcedAggregateRootRepository](https://eventsauce.io/docs/event-sourcing/bootstrap/). 
-However, when using the outbox pattern, we do not need to dispatch a message. 
-This repository decorates the original repository and ignores dispatch a message
+- [2.0](https://github.com/eventsauce-symfony/eventsauce-outbox/tree/2.0.1)
+
+### Repository without message dispatching
 
 ```php
 
-use Andreo\EventSauce\Outbox\EventSourcedAggregateRootRepositoryForOutbox;
+use Andreo\EventSauce\Outbox\Repository\EventSourcedAggregateRootRepositoryForOutbox;
 
 new EventSourcedAggregateRootRepositoryForOutbox(
     aggregateRootClassName: $aggregateRootClassName,
@@ -35,62 +35,69 @@ to the queuing system
 
 ```php
 
-use Andreo\EventSauce\Outbox\ForwardingMessageConsumer;
+use Andreo\EventSauce\Outbox\MessageConsumer\ForwardingMessageConsumer;
 
 new ForwardingMessageConsumer(
     messageDispatcher: $messageDispatcher // EventSauce\EventSourcing\MessageDispatcher
 )
 ```
 
-### Dispatch outbox messages
+### Command to dispatching messages from the outbox
 
 ```php
 
-use Andreo\EventSauce\Outbox\OutboxProcessMessagesCommand;
+use Andreo\EventSauce\Outbox\Command\OutboxMessagesConsumeCommand;
 
-new OutboxProcessMessagesCommand(
-    relays: $relays, // iterable<EventSauce\MessageOutbox\OutboxRelay>
-    logger: $logger, // Psr\Log\LoggerInterface | null
+new OutboxMessagesConsumeCommand(
+    relays: $relays, // Symfony\Component\DependencyInjection\ServiceLocator<EventSauce\MessageOutbox\OutboxRelay>
+    logger: $logger, // ?Psr\Log\LoggerInterface
 )
 ```
 
-### Consume messages command
-
 ```bash
-php bin/console andreo:eventsauce:message-outbox:consume
+php bin/console andreo:eventsauce:message-outbox:consume foo-relay-id
 ```
 
-#### Options
+#### Command options
+
+**relay id**
+
+- required
+- string
+
+`Unique relay id registered in service locator`
 
 **--run=true**
 
 - optional
 - default: true
 
+`Processing messages run`
+
 **--batch-size=100**
 
-How many messages are to be processed at once
+`How many messages are to be retrieve batch`
 
 - optional
 - default: 100
 
 **--commit-size=1**
 
-How many messages are to be committed at once
+`How many messages are to be committed at once`
 
 - optional
 - default: 1
 
 **--sleep=1**
 
-Number of seconds to sleep if the repository is empty
+`Number of seconds to sleep if the repository is empty`
 
 - optional
 - default: 1
 
 **--limit=-1**
 
-How many times messages are  to be processed
+`How many times messages are to be processed`
 
 - optional
 - default: -1 (infinity)

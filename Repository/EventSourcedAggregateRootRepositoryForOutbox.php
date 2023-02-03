@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Andreo\EventSauce\Outbox;
+namespace Andreo\EventSauce\Outbox\Repository;
 
 use EventSauce\EventSourcing\AggregateRoot;
 use EventSauce\EventSourcing\AggregateRootId;
@@ -21,7 +21,7 @@ use function count;
  *
  * @implements AggregateRootRepository<T>
  */
-final class EventSourcedAggregateRootRepositoryForOutbox implements AggregateRootRepository
+final readonly class EventSourcedAggregateRootRepositoryForOutbox implements AggregateRootRepository
 {
     /**
      * @param class-string<T>            $aggregateRootClassName

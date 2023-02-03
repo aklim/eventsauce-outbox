@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Andreo\EventSauce\Outbox;
+namespace Andreo\EventSauce\Outbox\MessageConsumer;
 
 use EventSauce\EventSourcing\Message;
 use EventSauce\EventSourcing\MessageConsumer;
 use EventSauce\EventSourcing\MessageDispatcher;
 
-final class ForwardingMessageConsumer implements MessageConsumer
+final readonly class ForwardingMessageConsumer implements MessageConsumer
 {
     private MessageDispatcher $messageDispatcher;
 
