@@ -21,7 +21,7 @@
         "eventsauce/message-outbox-for-doctrine": "^0.3.0",
         "eventsauce/test-utilities": "^3.0",
         "symfony/console": "^6.2",
-        "symfony/dependency-injection": "6.3.x-dev"
+        "symfony/dependency-injection": "^6.2"
     },
     "require-dev": {
         "eventsauce/uuid-encoding": "^0.3",
