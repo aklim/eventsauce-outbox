@@ -27,9 +27,11 @@ final class OutboxMessagesConsumeCommand extends Command
      */
     public function __construct(
         private readonly ServiceLocator $relays,
-        private readonly LoggerInterface $logger = new NullLogger()
+        private ?LoggerInterface $logger = null
     ) {
         parent::__construct();
+
+        $this->logger = $logger ?? new NullLogger();
     }
 
     protected function configure(): void
