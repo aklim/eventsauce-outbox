@@ -54,7 +54,7 @@ final class OutboxMessagesConsumeCommandTest extends TestCase
         $command = new OutboxMessagesConsumeCommand($relays);
         $tester = new CommandTester($command);
 
-        $tester->execute(['relay-id' => 'foo', '--limit' => 2]);
+        $tester->execute(['relays' => ['foo'], '--limit' => 2]);
     }
 
     /**
@@ -78,11 +78,11 @@ final class OutboxMessagesConsumeCommandTest extends TestCase
 
         $fooMessageConsumerMock = $this->createMock(MessageConsumer::class);
         $fooMessageConsumerMock
-            ->expects($this->exactly(5))
+            ->expects($this->exactly(10))
             ->method('handle')
         ;
 
-        $fooOutboxRelay = new OutboxRelay(
+        $relay = new OutboxRelay(
             $fooOutboxRepository,
             $fooMessageConsumerMock,
             new ImmediatelyFailingBackOffStrategy(),
@@ -90,13 +90,14 @@ final class OutboxMessagesConsumeCommandTest extends TestCase
         );
 
         $relays = new ServiceLocator([
-            'foo' => fn () => $fooOutboxRelay,
+            'foo' => fn () => $relay,
+            'bar' => fn () => $relay,
         ]);
 
         $command = new OutboxMessagesConsumeCommand($relays);
         $tester = new CommandTester($command);
 
-        $tester->execute(['relay-id' => 'foo', '--limit' => 1, '--batch-size' => 5]);
+        $tester->execute(['relays' => ['foo', 'bar'], '--limit' => 1, '--batch-size' => 5]);
     }
 
     /**
@@ -130,6 +131,6 @@ final class OutboxMessagesConsumeCommandTest extends TestCase
         $command = new OutboxMessagesConsumeCommand($relays);
         $tester = new CommandTester($command);
 
-        $tester->execute(['relay-id' => 'foo', '--run' => 'false', '--limit' => 1]);
+        $tester->execute(['relays' => ['foo'], '--run' => 'false', '--limit' => 1]);
     }
 }

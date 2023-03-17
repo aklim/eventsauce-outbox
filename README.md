@@ -60,12 +60,12 @@ php bin/console andreo:eventsauce:message-outbox:consume foo-relay-id
 
 #### Command options
 
-**relay id**
+**relays**
 
 - required
-- string
+- string[]
 
-`Unique relay id registered in service locator`
+`Relay ids registered in service locator`
 
 **--run=true**
 

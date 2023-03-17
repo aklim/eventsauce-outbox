@@ -38,9 +38,9 @@ final class OutboxMessagesConsumeCommand extends Command
     {
         $this
             ->addArgument(
-                name: 'relay-id',
-                mode: InputArgument::REQUIRED,
-                description: 'Relay id to be run',
+                name: 'relays',
+                mode: InputArgument::REQUIRED | InputArgument::IS_ARRAY,
+                description: 'Relays to be run',
             )
             ->addOption(
                 name: 'run',
@@ -80,7 +80,8 @@ final class OutboxMessagesConsumeCommand extends Command
         $output->writeln('Dispatching messages from the outbox has been run...');
 
         $run = filter_var($input->getOption('run'), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
-        $relayId = $input->getArgument('relay-id');
+        /** @var string[] $relayIds */
+        $relayIds = $input->getArgument('relays');
         $batchSize = $input->getOption('batch-size');
         $commitSize = $input->getOption('commit-size');
         $sleep = $input->getOption('sleep');
@@ -104,42 +105,44 @@ final class OutboxMessagesConsumeCommand extends Command
 
         $processCounter = 0;
         while ($run && (-1 === $limit || $processCounter < $limit)) {
-            try {
-                $relay = $this->relays->get($relayId);
-                assert($relay instanceof OutboxRelay);
-            } catch (ContainerExceptionInterface $e) {
-                $output->writeln(sprintf('Relay %s not found', $relayId));
+            foreach ($relayIds as $relayId) {
+                try {
+                    $relay = $this->relays->get($relayId);
+                    assert($relay instanceof OutboxRelay);
+                } catch (ContainerExceptionInterface $e) {
+                    $output->writeln(sprintf('Relay %s not found', $relayId));
 
-                return self::INVALID;
-            }
+                    return self::INVALID;
+                }
 
-            try {
-                $numberOfDispatchedMessages = $relay->publishBatch($batchSize, $commitSize);
-                if ($numberOfDispatchedMessages > 0) {
-                    $this->logger->info(
-                        'Relay: {relay} has dispatched {number} messages.',
+                try {
+                    $numberOfDispatchedMessages = $relay->publishBatch($batchSize, $commitSize);
+                    if ($numberOfDispatchedMessages > 0) {
+                        $this->logger->info(
+                            'Relay: {relay} has dispatched {number} messages.',
+                            [
+                                'relay' => $relayId,
+                                'number' => $numberOfDispatchedMessages,
+                            ]
+                        );
+                    }
+                } catch (Throwable $throwable) {
+                    $this->logger->critical(
+                        'Failed to dispatch messages from the outbox. Error: {error}, Relay: {relay}.',
                         [
+                            'error' => $throwable->getMessage(),
                             'relay' => $relayId,
-                            'number' => $numberOfDispatchedMessages,
+                            'exception' => $throwable,
                         ]
                     );
+                    $output->writeln('Failed to dispatch messages from the outbox.');
+
+                    return self::FAILURE;
                 }
-            } catch (Throwable $throwable) {
-                $this->logger->critical(
-                    'Failed to dispatch messages from the outbox. Error: {error}, Relay: {relay}.',
-                    [
-                        'error' => $throwable->getMessage(),
-                        'relay' => $relayId,
-                        'exception' => $throwable,
-                    ]
-                );
-                $output->writeln('Failed to dispatch messages from the outbox.');
 
-                return self::FAILURE;
-            }
-
-            if (0 === $numberOfDispatchedMessages) {
-                sleep($sleep);
+                if (0 === $numberOfDispatchedMessages) {
+                    sleep($sleep);
+                }
             }
 
             ++$processCounter;
