@@ -1,5 +1,5 @@
 {
-    "name": "andreo/eventsauce-outbox",
+    "name": "aklim/eventsauce-outbox",
     "description": "Extended message outbox components for EventSauce.",
     "keywords": [
         "eventsauce",
